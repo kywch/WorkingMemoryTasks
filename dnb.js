@@ -19,8 +19,8 @@ var session_design = [];
 var curr_block = 0;
 
 // these urls must be checked
-var dnb_instr_url = 'https://raw.githubusercontent.com/kywch/hello-world/master/instructions/';
-var audio_url = 'https://raw.githubusercontent.com/kywch/hello-world/master/sounds/';
+var dnb_instr_url = 'https://raw.githubusercontent.com/kywch/dnb_jsPsych/master/instructions/';
+var audio_url = 'https://raw.githubusercontent.com/kywch/dnb_jsPsych/master/sounds/';
 
 /*
  * Helper functions
