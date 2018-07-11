@@ -9,18 +9,20 @@
 /*
  * Generic task variables
  */
-var sbjId = "";
+var sbjId = ""; // mturk id
+var task_id = ""; // the prefix for the save file
 var flag_debug = true;
 var duration_trial = 3000; // ms
 var duration_square = 500; // ms
 
 var record_correct = {};
-var curr_trial = 0;
+var curr_block = 0;
 var session_design = [];
 
 // these urls must be checked
-var dnb_instr_url = 'https://raw.githubusercontent.com/kywch/hello-world/master/instructions/';
-var audio_url = 'https://raw.githubusercontent.com/kywch/hello-world/master/sounds/';
+var dnb_instr_url = 'https://raw.githubusercontent.com/kywch/dnb_jsPsych/master/instructions/';
+var audio_url = 'https://raw.githubusercontent.com/kywch/dnb_jsPsych/master/sounds/';
+var save_url = 'https://users.rcc.uchicago.edu/~kywch/dnb_201807/save_data.php';
 
 /*
  * Helper functions
@@ -46,21 +48,40 @@ function shuffle(array) {
     return array;
 }
 
+var focus_tracker = function(win) {
+  var self = this;
+  this.shift_away = 0;
+
+  this.get_shifts = function() {
+    return this.shift_away;
+  };
+
+  this.reset = function() {
+    this.shift_away = 0;
+  };
+
+  $(win).blur(function() {
+    self.shift_away += 1;
+  });
+};
+
+var focuser = new focus_tracker(window);
+
 function save_data() { // CHECK THE URL before use
-    console.log("Save data function called.");
-    console.log(jsPsych.data.dataAsJSON());
-    /*
+    if (flag_debug) {
+        console.log("Save data function called.");
+        console.log(jsPsych.data.get().json());
+    }
     $.ajax({
         type: 'post',
         cache: false,
-        url: 'https://webtask-humanperflab.rhcloud.com/maadm/save_data.php', // this is the path to the above PHP script
+        url: save_url, // this is the path to the above PHP script
         data: {
-            sessid: eval("sbjId"),
-            taskid: 'maadm1807',
-            sess_data: jsPsych.data.dataAsJSON()
+            sbj_id: eval("sbjId"),
+            task_id: eval("task_id"),
+            sess_data: jsPsych.data.get().csv()
         }
     });
-    */
 }
 
 
@@ -101,8 +122,8 @@ var enter_audio_check_page = {
         "The task you are about to do requires listening to sounds. Please adjust your sound setting. " +
         "Before going into the main task, we will do a simple task to make sure you can hear the sounds. </p>" +
         "<p class = block-text>In the next pages, press the alphabet key associated with the played sound to proceed. </p> " +
-        "<p class = block-text>If you are ready, press <strong>Space bar</strong> key to proceed.</p></div>",
-    choices: ['spacebar'],
+        "<p class = block-text>If you are ready, press the <strong>'n'</strong> key to proceed.</p></div>",
+    choices: ['n'],
     data: {
         exp_stage: 'enter_audio_check_page'
     }
@@ -116,7 +137,7 @@ for (var ii = 0; ii < audio_seed.length; ii++) {
         prompt: "<div class = centerbox><p class = block-text>" +
             "Trial " + (ii + 1) + " / " + audio_seed.length + " : " +
             "Please press the alphabet key you just heard.</p> " +
-            "<p class = block-text>To replay, press the <strong>r</strong> key. </p></div>",
+            "<p class = block-text>To replay, press the <strong>'r'</strong> key. </p></div>",
         choices: [audio_seed[ii]],
         data: {
             exp_stage: 'audio_check_trial',
@@ -164,18 +185,21 @@ function generate_task_block(block_count) {
 
     block_id = this_block['block_id'];
     sequence = this_block['stim_seq'];
-    flag_feedback = (typeof this_block['flag_feedback'] == 'undefined') ? false : this_block['flag_feedback'];
+    flag_feedback = (typeof this_block['feedback'] == 'undefined') ? false : this_block['feedback'];
 
     var block_sequence = [];
     var num_trial = sequence[0].length;
+
+    record_correct[block_id] = [];
 
     var enter_block_page = {
         type: 'audio-keyboard-with-replay',
         prompt: function() {
             return "<div class = centerbox><br><br><br><p class = very-large>" + this_block['prompt'] + '</p><br>' +
-                "<p class = center-block-text>Press <strong>Space bar</strong> key to proceed.</p></div>"
+                "<p class = center-block-text>Press the <strong>'n'</strong> key to proceed.</p>" +
+                "<p>If the key doesn't work, please click the screen and press again.</p></div>"
         },
-        choices: ['spacebar'],
+        choices: ['n'],
         data: {
             exp_stage: 'enter_block_page_' + block_id,
             session_design: this_block
@@ -209,11 +233,8 @@ function generate_task_block(block_count) {
                 audio_corresp: sequence[3][ii]
             },
             on_finish: function(data) {
-                var this_block = eval(block_reference);
-
-                if (ii == 0) {
-                    record_correct[block_id] = [];
-                }
+                var this_block = eval("session_design[curr_block]");
+                block_id = this_block["block_id"];
                 record_correct[block_id].push(data.correct);
                 if (ii == num_trial - 1) {
                     save_data();
@@ -224,10 +245,19 @@ function generate_task_block(block_count) {
                 }
             }
         }
-        if (flag_debug) {
-            console.log(block_id + " trial " + ii + " : ", dnb_trial);
-        }
         block_sequence.push(dnb_trial);
     }
+
+    var fixation_page = {
+        type: 'dual-nback-stim',
+        prompt: "<p class = block-text>Press <strong>'a'</strong> for a matching square " +
+            "and <strong>'l'</strong> for a matching sound.</p>",
+        on_finish: function() {
+            save_data();
+            curr_block += 1;
+        }
+    }
+    block_sequence.push(fixation_page);
+
     return block_sequence;
 }
