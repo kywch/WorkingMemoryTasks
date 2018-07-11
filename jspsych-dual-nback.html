@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="dnb.css"></link>
+
+    <script src="jspsych.js"></script>
+    <script src="jspsych-audio-keyboard-with-replay.js"></script>
+    <script src="jspsych-dual-nback.js"></script>
+    <script src="jspsych-instructions.js"></script>
+    <script src="jspsych-fullscreen.js"></script>
+    <script src="dnb_sequence.js"></script>
+    <script src="dnb.js"></script>
+</head>
+
+<body></body>
+<script>
+    /* ************************************ */
+    /* Main experiment sequence */
+    /* ************************************ */
+
+    session_design.push({ // the first practice block
+        block_id: 'b01_prac_2b',
+        stim_seq: stimSeq2b[0],
+        feedback: true,
+        prompt: '2-back practice with feedback'
+    });
+    session_design.push({
+        block_id: 'b02_main_2b',
+        stim_seq: stimSeq2b[1],
+        feedback: false,
+        prompt: '2-back main without feedback (1/4)'
+    });
+    session_design.push({
+        block_id: 'b03_main_3b',
+        stim_seq: stimSeq3b[0],
+        feedback: false,
+        prompt: '3-back main without feedback (2/4)'
+    });
+    session_design.push({
+        block_id: 'b04_main_2b',
+        stim_seq: stimSeq2b[0],
+        feedback: false,
+        prompt: '2-back main without feedback (3/4)'
+    });
+    session_design.push({
+        block_id: 'b05_main_3b',
+        stim_seq: stimSeq3b[1],
+        feedback: false,
+        prompt: '2-back main without feedback (4/4)'
+    });
+
+    var jspsych_session = [];
+
+    // use the full screen
+    jspsych_session.push({
+        type: 'fullscreen',
+        fullscreen_mode: true
+    })
+
+    jspsych_session.push({
+        timeline: block_audio_check
+    })
+
+    jspsych_session.push(dnb_instructions_page);
+
+    for (var ii = 0; ii < session_design.length; ii++) {
+        jspsych_session.push({
+            timeline: generate_task_block(ii)
+        });
+    }
+
+    // exit the full screen
+    jspsych_session.push({
+        type: 'fullscreen',
+        fullscreen_mode: false
+    })
+
+    jsPsych.init({
+        timeline: jspsych_session,
+        use_webaudio: true,
+        on_finish: function(data) {
+            //jsPsych.data.displayData();
+            jsPsych.data.get().localSave('csv', 'dnb_session.csv');
+
+            // save the whole experiment data to the server
+            save_data();
+
+            // a quick summary of the session
+            var perfKey = 'CT';
+            for (var ii = 0; ii < session_design.length; ii++) {
+                perfKey += '_' + record_correct[session_design[ii]['block_id']].reduce((a, b) => a + b, 0);
+            }
+            console.log("Perf key: ", perfKey);
+
+            /* variables to generate & pass to Qualtrics
+            Qualtrics.SurveyEngine.setEmbeddedData("perfKey", perfKey);
+            */
+
+        }
+    });
+</script>
+
+</html>
