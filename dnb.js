@@ -184,7 +184,7 @@ function generate_task_block(block_count) {
     var this_block = eval(block_reference);
 
     block_id = this_block['block_id'];
-    sequence = this_block['stim_seq'];
+    sequence = eval(this_block['stim_seq']);
     flag_feedback = (typeof this_block['feedback'] == 'undefined') ? false : this_block['feedback'];
 
     var block_sequence = [];
@@ -202,7 +202,7 @@ function generate_task_block(block_count) {
         choices: ['n'],
         data: {
             exp_stage: 'enter_block_page_' + block_id,
-            session_design: this_block
+            block_seq: this_block['stim_seq']
         }
     }
     var fixation_page = {
