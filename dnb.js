@@ -154,13 +154,13 @@ for (var ii = 0; ii < audio_seed.length; ii++) {
 var dnb_instructions_page = {
     type: 'instructions',
     pages: [
-        '<img class="resize" src="' + dnb_instr_url + '1.gif">',
-        '<img class="resize" src="' + dnb_instr_url + '2.gif">',
-        '<img class="resize" src="' + dnb_instr_url + '3.gif">',
-        '<img class="resize" src="' + dnb_instr_url + '4.gif">',
-        '<img class="resize" src="' + dnb_instr_url + '5.gif">',
-        '<img class="resize" src="' + dnb_instr_url + '6.gif">',
-        '<img class="resize" src="' + dnb_instr_url + '7.gif">',
+        '<img class="resize" src="' + dnb_instr_url + '1.png">',
+        '<img class="resize" src="' + dnb_instr_url + '2.png">',
+        '<img class="resize" src="' + dnb_instr_url + '3.png">',
+        '<img class="resize" src="' + dnb_instr_url + '4.png">',
+        '<img class="resize" src="' + dnb_instr_url + '5.png">',
+        '<img class="resize" src="' + dnb_instr_url + '6.png">',
+        '<img class="resize" src="' + dnb_instr_url + '7.png">',
         '<div class = centerbox><p class = block-text>You can read the instruction again by clicking the <strong>Previous</strong> button</p>' +
         '<p class = block-text>Clicking the <strong>Next</strong> button will finish the instruction.</p></div>'
     ],
