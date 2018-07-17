@@ -198,7 +198,7 @@ function generate_task_block(block_count) {
         prompt: function() {
             return "<div class = centerbox><br><br><br><p class = very-large>" + this_block['prompt'] + '</p><br>' +
                 "<p class = center-block-text>Press the <strong>'n'</strong> key to proceed.</p>" +
-                "<p class = center-block-text>If the key doesn't work, please click the screen and press again.</p></div>"
+                "<p class = block-text>If the key doesn't work, please click the screen and press again.</p></div>"
         },
         choices: ['n'],
         data: {
