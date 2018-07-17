@@ -122,7 +122,8 @@ var enter_audio_check_page = {
         "The task you are about to do requires listening to sounds. Please adjust your sound setting. " +
         "Before going into the main task, we will do a simple task to make sure you can hear the sounds. </p>" +
         "<p class = block-text>In the next pages, press the alphabet key associated with the played sound to proceed. </p> " +
-        "<p class = block-text>If you are ready, press the <strong>'n'</strong> key to proceed.</p></div>",
+        "<p class = block-text>If you are ready, press the <strong>'n'</strong> key to proceed.</p>" +
+        "<p class = block-text>If the key doesn't work, please click the screen and press again.</p></div>",
     choices: ['n'],
     data: {
         exp_stage: 'enter_audio_check_page'
@@ -197,7 +198,7 @@ function generate_task_block(block_count) {
         prompt: function() {
             return "<div class = centerbox><br><br><br><p class = very-large>" + this_block['prompt'] + '</p><br>' +
                 "<p class = center-block-text>Press the <strong>'n'</strong> key to proceed.</p>" +
-                "<p>If the key doesn't work, please click the screen and press again.</p></div>"
+                "<p class = center-block-text>If the key doesn't work, please click the screen and press again.</p></div>"
         },
         choices: ['n'],
         data: {
