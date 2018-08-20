@@ -11,7 +11,7 @@
  */
 var sbjId = ""; // mturk id
 var task_id = ""; // the prefix for the save file
-var flag_debug = true;
+var flag_debug = false;
 var duration_trial = 3000; // ms
 var duration_square = 500; // ms
 
@@ -72,7 +72,7 @@ function save_data() { // CHECK THE URL before use
         console.log("Save data function called.");
         console.log(jsPsych.data.get().json());
     }
-    $.ajax({
+    jQuery.ajax({
         type: 'post',
         cache: false,
         url: save_url, // this is the path to the above PHP script
