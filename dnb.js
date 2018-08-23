@@ -272,7 +272,7 @@ function generate_task_block(block_count) {
             visual_stimulation_duration: duration_square,
             auditory: get_audio_url(audio_seed[sequence[2][ii]]),
             prompt: "<p class = block-text>(<strong>" + curr_task + "</strong>) Press <strong>'a'</strong> for a matching square " +
-                "and <strong>'l'</strong> for a matching sound.</p>"
+                "and <strong>'l'</strong> for a matching sound.</p>",
             correct_response: [sequence[1][ii], sequence[3][ii]],
             show_feedback: flag_feedback,
             data: {
@@ -302,7 +302,7 @@ function generate_task_block(block_count) {
     var fixation_page = {
         type: 'dual-nback-stim',
         prompt: "<p class = block-text>(<strong>" + curr_task + "</strong>) Press <strong>'a'</strong> for a matching square " +
-            "and <strong>'l'</strong> for a matching sound.</p>"
+            "and <strong>'l'</strong> for a matching sound.</p>",
         on_finish: function() {
             save_data();
             curr_block += 1;
