@@ -18,7 +18,6 @@ var duration_square = 500; // ms
 var record_correct = {};
 var curr_block = 0;
 var session_design = [];
-var curr_task = "";
 
 // these urls must be checked
 var dnb_instr_url = 'https://raw.githubusercontent.com/kywch/dnb_jsPsych/master/instructions/';
@@ -245,7 +244,6 @@ function generate_task_block(block_count) {
     var enter_block_page = {
         type: 'audio-keyboard-with-replay',
         prompt: function() {
-            curr_task = this_block['task'];
             return "<div class = centerbox><br><br><br><p class = very-large>" + this_block['prompt'] + '</p><br>' +
                 "<p class = center-block-text>Press the <strong>'n'</strong> key to proceed.</p>" +
                 "<p class = center-block-text>If the key doesn't work, please click the screen and press again.</p></div>"
@@ -258,7 +256,7 @@ function generate_task_block(block_count) {
     }
     var fixation_page = {
         type: 'dual-nback-stim',
-        prompt: "<p class = block-text>(<strong>" + curr_task + "</strong>) Press <strong>'a'</strong> for a matching square " +
+        prompt: "<p class = block-text>(<strong>" + this_block['task'] + "</strong>) Press <strong>'a'</strong> for a matching square " +
             "and <strong>'l'</strong> for a matching sound.</p>"
     }
     block_sequence.push(enter_block_page);
@@ -271,8 +269,8 @@ function generate_task_block(block_count) {
             visual: visual_stim[sequence[0][ii]],
             visual_stimulation_duration: duration_square,
             auditory: get_audio_url(audio_seed[sequence[2][ii]]),
-            prompt: "<p class = block-text>(<strong>" + curr_task + "</strong>) Press <strong>'a'</strong> for a matching square " +
-                "and <strong>'l'</strong> for a matching sound.</p>",
+            prompt: "<p class = block-text>(<strong>" + this_block['task'] + "</strong>) Press <strong>'a'</strong> for a matching square " +
+                "and <strong>'l'</strong> for a matching sound.</p>"
             correct_response: [sequence[1][ii], sequence[3][ii]],
             show_feedback: flag_feedback,
             data: {
@@ -301,8 +299,8 @@ function generate_task_block(block_count) {
 
     var fixation_page = {
         type: 'dual-nback-stim',
-        prompt: "<p class = block-text>(<strong>" + curr_task + "</strong>) Press <strong>'a'</strong> for a matching square " +
-            "and <strong>'l'</strong> for a matching sound.</p>",
+        prompt: "<p class = block-text>(<strong>" + this_block['task'] + "</strong>) Press <strong>'a'</strong> for a matching square " +
+            "and <strong>'l'</strong> for a matching sound.</p>"
         on_finish: function() {
             save_data();
             curr_block += 1;
