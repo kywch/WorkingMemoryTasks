@@ -11,13 +11,14 @@
  */
 var sbjId = ""; // mturk id
 var task_id = ""; // the prefix for the save file
-var flag_debug = false;
+var flag_debug = true;
 var duration_trial = 3000; // ms
 var duration_square = 500; // ms
 
 var record_correct = {};
 var curr_block = 0;
 var session_design = [];
+var curr_task = "";
 
 // these urls must be checked
 var dnb_instr_url = 'https://raw.githubusercontent.com/kywch/dnb_jsPsych/master/instructions/';
@@ -72,7 +73,7 @@ function save_data() { // CHECK THE URL before use
         console.log("Save data function called.");
         console.log(jsPsych.data.get().json());
     }
-    jQuery.ajax({
+    $.ajax({
         type: 'post',
         cache: false,
         url: save_url, // this is the path to the above PHP script
@@ -152,7 +153,7 @@ for (var ii = 0; ii < audio_seed.length; ii++) {
 /*
  * N-back instruction page
  */
-var dnb_instructions_page = {
+var dnb_instructions_page_pre = {
     type: 'instructions',
     pages: [
         '<img class="resize" src="' + dnb_instr_url + '1.png">',
@@ -166,13 +167,61 @@ var dnb_instructions_page = {
         '<p class = block-text>Clicking the <strong>Next</strong> button will finish the instruction.</p></div>'
     ],
     data: {
-        exp_stage: 'dnb_instructions_page',
+        exp_stage: 'dnb_instructions_page_pre',
         visual_stim: visual_stim, // the shuffled visual stim for reference
         audio_seed: audio_seed // shuffled audio seed for reference
     },
     allow_keys: false,
     show_clickable_nav: true,
     show_page_number: true
+};
+
+var dnb_instructions_page_begin3b_pre = {
+  type: 'instructions',
+  pages: [
+      '<img class="resize" src="' + dnb_instr_url + 'trans_2to3b_pre.png">'
+  ],
+  data: {
+      exp_stage: 'dnb_instructions_page_begin3b',
+      visual_stim: visual_stim, // the shuffled visual stim for reference
+      audio_seed: audio_seed // shuffled audio seed for reference
+  },
+  allow_keys: false,
+  show_clickable_nav: true,
+  show_page_number: true
+};
+
+var dnb_instructions_page_post = {
+  type: 'instructions',
+  pages: [
+      '<img class="resize" src="' + dnb_instr_url + 'recap1.png">',
+      '<img class="resize" src="' + dnb_instr_url + 'recap2.png">',
+      '<div class = centerbox><p class = block-text>You can read the instruction again by clicking the <strong>Previous</strong> button</p>' +
+      '<p class = block-text>Clicking the <strong>Next</strong> button will finish the instruction.</p></div>'
+  ],
+  data: {
+      exp_stage: 'dnb_instructions_page_post',
+      visual_stim: visual_stim, // the shuffled visual stim for reference
+      audio_seed: audio_seed // shuffled audio seed for reference
+  },
+  allow_keys: false,
+  show_clickable_nav: true,
+  show_page_number: true
+};
+
+var dnb_instructions_page_begin3b_post = {
+  type: 'instructions',
+  pages: [
+      '<img class="resize" src="' + dnb_instr_url + 'trans_2to3b_post.png">'
+  ],
+  data: {
+      exp_stage: 'dnb_instructions_page_begin3b',
+      visual_stim: visual_stim, // the shuffled visual stim for reference
+      audio_seed: audio_seed // shuffled audio seed for reference
+  },
+  allow_keys: false,
+  show_clickable_nav: true,
+  show_page_number: true
 };
 
 
@@ -196,9 +245,10 @@ function generate_task_block(block_count) {
     var enter_block_page = {
         type: 'audio-keyboard-with-replay',
         prompt: function() {
+            curr_task = this_block['task'];
             return "<div class = centerbox><br><br><br><p class = very-large>" + this_block['prompt'] + '</p><br>' +
                 "<p class = center-block-text>Press the <strong>'n'</strong> key to proceed.</p>" +
-                "<p class = block-text>If the key doesn't work, please click the screen and press again.</p></div>"
+                "<p class = center-block-text>If the key doesn't work, please click the screen and press again.</p></div>"
         },
         choices: ['n'],
         data: {
@@ -208,7 +258,7 @@ function generate_task_block(block_count) {
     }
     var fixation_page = {
         type: 'dual-nback-stim',
-        prompt: "<p class = block-text>Press <strong>'a'</strong> for a matching square " +
+        prompt: "<p class = block-text>(<strong>" + curr_task + "</strong>) Press <strong>'a'</strong> for a matching square " +
             "and <strong>'l'</strong> for a matching sound.</p>"
     }
     block_sequence.push(enter_block_page);
@@ -221,8 +271,8 @@ function generate_task_block(block_count) {
             visual: visual_stim[sequence[0][ii]],
             visual_stimulation_duration: duration_square,
             auditory: get_audio_url(audio_seed[sequence[2][ii]]),
-            prompt: "<p class = block-text>Press <strong>'a'</strong> for a matching square " +
-                "and <strong>'l'</strong> for a matching sound.</p>",
+            prompt: "<p class = block-text>(<strong>" + curr_task + "</strong>) Press <strong>'a'</strong> for a matching square " +
+                "and <strong>'l'</strong> for a matching sound.</p>"
             correct_response: [sequence[1][ii], sequence[3][ii]],
             show_feedback: flag_feedback,
             data: {
@@ -251,8 +301,8 @@ function generate_task_block(block_count) {
 
     var fixation_page = {
         type: 'dual-nback-stim',
-        prompt: "<p class = block-text>Press <strong>'a'</strong> for a matching square " +
-            "and <strong>'l'</strong> for a matching sound.</p>",
+        prompt: "<p class = block-text>(<strong>" + curr_task + "</strong>) Press <strong>'a'</strong> for a matching square " +
+            "and <strong>'l'</strong> for a matching sound.</p>"
         on_finish: function() {
             save_data();
             curr_block += 1;
