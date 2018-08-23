@@ -72,7 +72,7 @@ function save_data() { // CHECK THE URL before use
         console.log("Save data function called.");
         console.log(jsPsych.data.get().json());
     }
-    $.ajax({
+    jQuery.ajax({
         type: 'post',
         cache: false,
         url: save_url, // this is the path to the above PHP script
