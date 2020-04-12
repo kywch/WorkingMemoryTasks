@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kywch/WorkingMemoryTasks/lib/wmt_dnbds.css">
+    </link>
+
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/kywch/WorkingMemoryTasks/lib/jspsych.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/kywch/WorkingMemoryTasks/lib/jspsych-fullscreen.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/kywch/WorkingMemoryTasks/lib/jspsych-instructions.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/kywch/WorkingMemoryTasks/lib/jspsych-html-keyboard-response.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/kywch/WorkingMemoryTasks/lib/jspsych-multi-html-noresp.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/kywch/WorkingMemoryTasks/lib/jspsych-numpad-response.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/kywch/WorkingMemoryTasks/lib/digit-span_main.js"></script>
+</head>
+
+<body></body>
+<script>
+    /* ************************************ */
+    /* Task-related variables  */
+    /* ************************************ */
+    $('<div class = display_stage_background></div>').appendTo('body');
+    $('<div class = display_stage></div>').appendTo('body');
+
+    sbjId = "test";
+    task_id = "bds";
+    data_dir = "data00";
+
+    // CHECK THE URL!!
+    save_url = 'https://users.rcc.uchicago.edu/~kywch/WorkingMemoryTasks/save_data.php';
+
+    // instruction
+    var instruction_bds_start_page = {
+        type: 'instructions',
+        pages: [
+            '<div class = centerbox><p class = block-text>In this task you will have to try to remember a sequence of numbers that will appear on the screen one after the other.</p>' +
+            '<p class = block-text>Each trial will begin by telling you how many digits you will need to remember for that trial.</p></div>',
+            '<div class = centerbox><p class = block-text>At the end of each trial, you should enter the numbers you saw into the numpad <b><font color=red>in reverse order</font></b>.</p>' +
+            '<p class = block-text>So the last number you saw should be first in your response, the second to last should be the second in your response, etc.</p>' +
+            '<p class = block-text>For example, if you saw the sequence "1...2...3", you would enter "3...2...1" into the numpad.</p></div>',
+            "<div class = centerbox><p class = block-text>When you're ready to begin, please click <b>the Next button</b> below.</p></div>"
+        ],
+        data: {
+            exp_stage: 'instruction_bds_start_page'
+        },
+        allow_keys: false,
+        show_clickable_nav: true,
+        show_page_number: true
+    };
+
+
+    /* ************************************ */
+    /* Main experiment sequence */
+    /* ************************************ */
+    flag_debug = true;
+
+    var jspsych_session = [];
+
+    // use the full screen
+    jspsych_session.push({
+        type: 'fullscreen',
+        fullscreen_mode: true
+    })
+
+    // instruction
+    jspsych_session.push(instruction_bds_start_page);
+
+    // main session
+    num_trial_adaptive = 12;
+    jspsych_session.push({
+        timeline: generate_backward_block_adaptive(num_trial_adaptive)
+    });
+
+    // exit the full screen
+    jspsych_session.push({
+        type: 'fullscreen',
+        fullscreen_mode: false
+    })
+
+    jsPsych.init({
+        timeline: jspsych_session,
+
+        display_element: document.querySelector('.display_stage'),
+
+        on_data_update: function (data) { // each time the data is updated:
+            // write the current window resolution to the data
+            data.win_res = window.innerWidth + 'x' + window.innerHeight;
+            data.fullscr = fullscr_ON;
+        },
+
+        on_interaction_data_update: function (data) {
+            //interaction data logs if participants leaves the browser window or exits full screen mode
+            interaction = data.event;
+            if (interaction.includes("fullscreen")) {
+                // some unhandy coding to circumvent a bug in jspsych that logs fullscreenexit when actually entering
+                if (fullscr_ON == 'no') {
+                    fullscr_ON = 'yes';
+                    return fullscr_ON;
+                } else if (fullscr_ON == 'yes') {
+                    fullscr_ON = 'no';
+                    return fullscr_ON;
+                }
+            } else if (interaction == 'blur' || interaction == 'focus') {
+                focus = interaction;
+                return focus;
+            }
+        },
+
+        on_finish: function (data) {
+            //jsPsych.data.displayData();
+            jsPsych.data.get().localSave('csv', 'bds_session.json');
+
+            // save the whole experiment data to the server
+            //save_data();
+
+            // a quick summary of the session
+            // correct count
+            var num_corr = Math.round(corr_history.reduce(function (a, b) {
+                return (a + b);
+            }, 0)).toString();
+            console.log("Num correct & digit history: ", num_corr, digit_history);
+
+            // variables to generate & pass to Qualtrics
+            // Qualtrics.SurveyEngine.setEmbeddedData("BDS_corr", numCorr);
+            // Qualtrics.SurveyEngine.setEmbeddedData("Digit_history", digit_history.toString().replace(/,/g, ';'));
+
+        }
+    });
+</script>
+
+</html>
