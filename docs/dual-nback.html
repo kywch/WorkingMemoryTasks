@@ -2,53 +2,141 @@
 <html>
 
 <head>
-    <link rel="stylesheet" href="https://rawgit.com/kywch/dnb_jsPsych/master/dnb.css"></link>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kywch/WorkingMemoryTasks/lib/wmt_dnbds.css">
+    </link>
 
     <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
-    <script src="https://rawgit.com/kywch/dnb_jsPsych/master/jspsych.js"></script>
-    <script src="https://rawgit.com/kywch/dnb_jsPsych/master/jspsych-audio-keyboard-with-replay.js"></script>
-    <script src="https://rawgit.com/kywch/dnb_jsPsych/master/jspsych-dual-nback.js"></script>
-    <script src="https://rawgit.com/kywch/dnb_jsPsych/master/jspsych-instructions.js"></script>
-    <script src="https://rawgit.com/kywch/dnb_jsPsych/master/jspsych-fullscreen.js"></script>
-    <script src="https://rawgit.com/kywch/dnb_jsPsych/master/dnb_sequence.js"></script>
-    <script src="https://rawgit.com/kywch/dnb_jsPsych/master/dnb.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/kywch/WorkingMemoryTasks/lib/jspsych.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/kywch/WorkingMemoryTasks/lib/jspsych-audio-keyboard-with-replay.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/gh/kywch/WorkingMemoryTasks/lib/jspsych-dual-nback.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/kywch/WorkingMemoryTasks/lib/jspsych-instructions.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/kywch/WorkingMemoryTasks/lib/jspsych-fullscreen.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/kywch/WorkingMemoryTasks/lib/dnb_sequence.js"></script>
+    <script src="https://users.rcc.uchicago.edu/~kywch/WorkingMemoryTasks/lib/dual-nback_main.js"></script>
 </head>
 
 <body></body>
 <script>
     /* ************************************ */
+    /* Task-related variables  */
+    /* ************************************ */
+    $('<div class = display_stage_background></div>').appendTo('body');
+    $('<div class = display_stage></div>').appendTo('body');
+
+    sbjId = "test";
+    task_id = "dnb";
+    data_dir = "data00";
+
+    // these urls must be checked
+    instr_url = 'https://raw.githubusercontent.com/kywch/WorkingMemoryTasks/master/instructions/dnb/';
+    audio_url = 'https://raw.githubusercontent.com/kywch/WorkingMemoryTasks/master/sounds/';
+
+    // CHECK THE URL!!
+    save_url = 'https://users.rcc.uchicago.edu/~kywch/WorkingMemoryTasks/save_data.php';
+
+    /* ************************************ */
+    /* Instruction-related scripts */
+    /* ************************************ */
+    var instr_imglist = [];
+    for (var ii = 0; ii < 7; ii++) {
+        instr_imglist.push(instr_url + (ii + 1).toString() + '.png');
+    }
+
+    function generate_instruction_page(imglist) {
+        var instructions_page = {
+            type: 'instructions',
+            pages: function () {
+                var pages = [];
+                for (var ii = 0; ii < imglist.length; ii++) {
+                    pages.push('<img class="resize" src="' + imglist[ii] + '">');
+                }
+                pages.push(
+                    '<div class = centerbox><p class = block-text>You can read the instruction again by clicking the <strong>Previous</strong> button.</p>' +
+                    '<p class = block-text>Clicking the <strong>Next</strong> button will finish the instruction.</p></div>'
+                );
+                return pages;
+            },
+            data: {
+                exp_stage: 'task_instructions_page',
+                visual_stim: visual_stim, // the shuffled visual stim for reference
+                audio_seed: audio_seed // shuffled audio seed for reference
+            },
+            allow_keys: false,
+            show_clickable_nav: true,
+            show_page_number: true
+        };
+        return instructions_page;
+    }
+
+    var instruction_3back_start_page = {
+        type: 'instructions',
+        pages: [
+            '<div class = centerbox><p class = block-text>You have now completed the 2-back task. </p>' +
+            '<p class = block-text>Before starting the 3-back task, you will do a short practice round.</p></div>'
+        ],
+        data: {
+            exp_stage: 'instruction_3back_start_page',
+            visual_stim: visual_stim, // the shuffled visual stim for reference
+            audio_seed: audio_seed // shuffled audio seed for reference
+        },
+        allow_keys: false,
+        show_clickable_nav: true,
+        show_page_number: true
+    };
+
+
+    /* ************************************ */
     /* Main experiment sequence */
     /* ************************************ */
 
+    // Exp sequences to be used
+    var seq_seq = Array.apply(0, Array(stimSeq2b.length)).map(function (_, b) {
+        return b;
+    });
+    seq_seq = shuffle([...seq_seq]);
+
     session_design.push({ // the first practice block
+        task: "2-back",
         block_id: 'b01_prac_2b',
-        stim_seq: stimSeq2b[0],
+        stim_seq: 'pracSeq2b',
         feedback: true,
         prompt: '2-back practice with feedback'
     });
     session_design.push({
+        task: "2-back",
         block_id: 'b02_main_2b',
-        stim_seq: stimSeq2b[1],
+        stim_seq: 'stimSeq2b[' + seq_seq[0].toString() + ']',
         feedback: false,
         prompt: '2-back main without feedback (1/4)'
     });
     session_design.push({
-        block_id: 'b03_main_3b',
-        stim_seq: stimSeq3b[0],
+        task: "2-back",
+        block_id: 'b03_main_2b',
+        stim_seq: 'stimSeq2b[' + seq_seq[1].toString() + ']',
         feedback: false,
-        prompt: '3-back main without feedback (2/4)'
+        prompt: '2-back main without feedback (2/4)'
     });
     session_design.push({
-        block_id: 'b04_main_2b',
-        stim_seq: stimSeq2b[0],
-        feedback: false,
-        prompt: '2-back main without feedback (3/4)'
+        task: "3-back",
+        block_id: 'b04_prac_3b',
+        stim_seq: 'pracSeq3b',
+        feedback: true,
+        prompt: '3-back practice with feedback'
     });
     session_design.push({
+        task: "3-back",
         block_id: 'b05_main_3b',
-        stim_seq: stimSeq3b[1],
+        stim_seq: 'stimSeq3b[' + seq_seq[2].toString() + ']',
         feedback: false,
-        prompt: '2-back main without feedback (4/4)'
+        prompt: '3-back main without feedback (3/4)'
+    });
+    session_design.push({
+        task: "3-back",
+        block_id: 'b06_main_3b',
+        stim_seq: 'stimSeq3b[' + seq_seq[3].toString() + ']',
+        feedback: false,
+        prompt: '3-back main without feedback (4/4)'
     });
 
     var jspsych_session = [];
@@ -63,9 +151,19 @@
         timeline: block_audio_check
     })
 
-    jspsych_session.push(dnb_instructions_page);
+    jspsych_session.push(generate_instruction_page(instr_imglist));
 
-    for (var ii = 0; ii < session_design.length; ii++) {
+    // 2-back: 1 practice + 2 main
+    for (var ii = 0; ii < 3; ii++) {
+        jspsych_session.push({
+            timeline: generate_task_block(ii)
+        });
+    }
+
+    jspsych_session.push(instruction_3back_start_page);
+
+    // 3-back: 1 practice + 2 main
+    for (var ii = 3; ii < 6; ii++) {
         jspsych_session.push({
             timeline: generate_task_block(ii)
         });
@@ -78,11 +176,39 @@
     })
 
     jsPsych.init({
-        timeline: jspsych_session,
         use_webaudio: true,
-        on_finish: function(data) {
+        timeline: jspsych_session,
+        preload_images: instr_imglist,
+
+        display_element: document.querySelector('.display_stage'),
+
+        on_data_update: function (data) { // each time the data is updated:
+            // write the current window resolution to the data
+            data.win_res = window.innerWidth + 'x' + window.innerHeight;
+            data.fullscr = fullscr_ON;
+        },
+
+        on_interaction_data_update: function (data) {
+            //interaction data logs if participants leaves the browser window or exits full screen mode
+            interaction = data.event;
+            if (interaction.includes("fullscreen")) {
+                // some unhandy coding to circumvent a bug in jspsych that logs fullscreenexit when actually entering
+                if (fullscr_ON == 'no') {
+                    fullscr_ON = 'yes';
+                    return fullscr_ON;
+                } else if (fullscr_ON == 'yes') {
+                    fullscr_ON = 'no';
+                    return fullscr_ON;
+                }
+            } else if (interaction == 'blur' || interaction == 'focus') {
+                focus = interaction;
+                return focus;
+            }
+        },
+
+        on_finish: function (data) {
             //jsPsych.data.displayData();
-            jsPsych.data.get().localSave('csv', 'dnb_session.csv');
+            jsPsych.data.get().localSave('csv', 'dnb_session.json');
 
             // save the whole experiment data to the server
             save_data();
